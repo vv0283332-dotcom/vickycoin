@@ -1,0 +1,15 @@
+.env
+node_modules/
+artifacts/
+cache/
+*.log
+
+# Local wallet/test files
+.env
+test-wallet.json
+
+
+# Local wallet/test files
+.env
+test-wallet.json
+

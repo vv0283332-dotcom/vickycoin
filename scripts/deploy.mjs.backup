@@ -1,0 +1,52 @@
+import "dotenv/config";
+import fs from "node:fs";
+import path from "node:path";
+import { ethers } from "ethers";
+
+const rpc = process.env.RPC_URL;
+const privateKey = process.env.PRIVATE_KEY;
+
+if (!rpc || !privateKey || privateKey.includes("PASTE_YOUR")) {
+  throw new Error("Set RPC_URL and PRIVATE_KEY in .env first.");
+}
+
+const artifact = JSON.parse(
+  fs.readFileSync(path.join(process.cwd(), "artifacts", "VickyCoin.json"), "utf8")
+);
+
+const provider = new ethers.JsonRpcProvider(rpc);
+const wallet = new ethers.Wallet(privateKey, provider);
+const network = await provider.getNetwork();
+
+console.log("Network:", network.name, "chainId:", network.chainId.toString());
+console.log("Deployer:", wallet.address);
+
+const balance = await provider.getBalance(wallet.address);
+console.log("Native balance:", ethers.formatEther(balance));
+
+const factory = new ethers.ContractFactory(artifact.abi, artifact.bytecode, wallet);
+const token = await factory.deploy();
+console.log("Deployment transaction:", token.deploymentTransaction().hash);
+
+await token.waitForDeployment();
+const address = await token.getAddress();
+
+console.log("\nVickyCoin deployed.");
+console.log("Contract:", address);
+console.log("Name:", await token.name());
+console.log("Symbol:", await token.symbol());
+console.log("Decimals:", await token.decimals());
+console.log("Total supply:", ethers.formatEther(await token.totalSupply()), "VIC");
+console.log("Explorer:", `https://sepolia.basescan.org/address/${address}`);
+
+fs.writeFileSync(
+  path.join(process.cwd(), "artifacts", "deployment.json"),
+  JSON.stringify({
+    network: network.name,
+    chainId: network.chainId.toString(),
+    deployer: wallet.address,
+    contract: address,
+    explorer: `https://sepolia.basescan.org/address/${address}`,
+    deployedAt: new Date().toISOString()
+  }, null, 2)
+);
