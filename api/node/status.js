@@ -33,7 +33,7 @@ export default async function handler(req, res) {
 
     res.status(200).json({
       status: "online",
-      network: network.name,
+      network: "Base Sepolia",
       chainId: Number(network.chainId),
       blockHeight: blockNumber,
       blockchain: "Base Sepolia",
@@ -44,6 +44,8 @@ export default async function handler(req, res) {
         totalSupply: ethers.formatUnits(totalSupply, decimals),
         contract: CONTRACT
       },
+      explorer:
+        `https://sepolia.basescan.org/address/${CONTRACT}`,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
