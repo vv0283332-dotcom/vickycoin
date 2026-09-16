@@ -24,12 +24,14 @@ export default async function handler(req, res) {
 
     const contract = new ethers.Contract(CONTRACT, ABI, provider);
 
-    const [name, symbol, decimals, totalSupply] = await Promise.all([
+    const [name, symbol, decimalsRaw, totalSupply] = await Promise.all([
       contract.name(),
       contract.symbol(),
       contract.decimals(),
       contract.totalSupply()
     ]);
+
+    const decimals = Number(decimalsRaw);
 
     res.status(200).json({
       status: "online",
